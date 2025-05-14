@@ -71,14 +71,16 @@ let activeIndex = null;
 
 function initGroups() {
   const groupsContainer = document.getElementById('groups');
+  // Pastikan container ada sebelum mencoba mengisinya
+  if (!groupsContainer) return;
+  
   groupsContainer.innerHTML = '';
   groups.forEach((group, index) => {
     const card = document.createElement('div');
     card.id = `group-${index}`;
     card.className = `group-card bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 mb-4 hover:shadow-lg cursor-pointer ${activeIndex === index ? 'ring-2 ring-blue-500' : ''}`;
-    card.style.opacity = '0';
-    card.style.transform = 'translateY(20px)';
-    card.style.animation = `fadeInUp 0.5s ease-out ${index * 0.1}s forwards`;
+    card.style.opacity = '1'; // Langsung tampilkan tanpa animasi untuk mencegah masalah
+    card.style.transform = 'translateY(0)';
 
     card.innerHTML = `
       <div class="p-5">
@@ -118,16 +120,13 @@ function initGroups() {
       }
       toggleGroupDetail(index);
     });
-
-    setTimeout(() => {
-      card.style.opacity = '1';
-      card.style.transform = 'translateY(0)';
-    }, index * 100);
   });
 }
 
 function toggleGroupDetail(index) {
   const detail = document.getElementById(`detail-${index}`);
+  if (!detail) return; // Pastikan elemen ada
+  
   const allCards = document.querySelectorAll('.group-card');
   const allArrows = document.querySelectorAll('.fa-chevron-down');
   
@@ -136,8 +135,8 @@ function toggleGroupDetail(index) {
     if (i !== index && el.classList.contains('max-h-[300px]')) {
       el.classList.remove('max-h-[300px]');
       el.classList.add('max-h-0');
-      allCards[i].classList.remove('ring-2', 'ring-blue-500');
-      allArrows[i].classList.remove('rotate-180');
+      if (allCards[i]) allCards[i].classList.remove('ring-2', 'ring-blue-500');
+      if (allArrows[i]) allArrows[i].classList.remove('rotate-180');
     }
   });
 
@@ -146,21 +145,16 @@ function toggleGroupDetail(index) {
     // Jika sudah terbuka, tutup
     detail.classList.remove('max-h-[300px]');
     detail.classList.add('max-h-0');
-    allCards[index].classList.remove('ring-2', 'ring-blue-500');
-    allArrows[index].classList.remove('rotate-180');
+    if (allCards[index]) allCards[index].classList.remove('ring-2', 'ring-blue-500');
+    if (allArrows[index]) allArrows[index].classList.remove('rotate-180');
     activeIndex = null;
   } else {
     // Jika tertutup, buka
     detail.classList.remove('max-h-0');
     detail.classList.add('max-h-[300px]');
-    allCards[index].classList.add('ring-2', 'ring-blue-500');
-    allArrows[index].classList.add('rotate-180');
+    if (allCards[index]) allCards[index].classList.add('ring-2', 'ring-blue-500');
+    if (allArrows[index]) allArrows[index].classList.add('rotate-180');
     activeIndex = index;
-
-    // Scroll ke kartu yang dibuka jika perlu
-    setTimeout(() => {
-      detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 100);
   }
 }
 
@@ -206,9 +200,13 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
   document.head.appendChild(style);
 
-  showLoader();
-
-  setTimeout(hideLoader, 1500);
+  // Langsung inisialisasi grup tanpa loader untuk mencegah looping
+  initGroups();
+  
+  // Sembunyikan loader jika masih ada
+  if (pageLoader) {
+    pageLoader.style.display = 'none';
+  }
 });
 
 // Fungsi untuk toggle detail group (versi global)
